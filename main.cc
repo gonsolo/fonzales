@@ -28,6 +28,13 @@ void check(OptixResult result) {
         }
 }
 
+void check(CUresult result) {
+        if (result != CUDA_SUCCESS) {
+                cerr << "Cuda error: " << result << endl;
+                exit(EXIT_FAILURE);
+        }
+}
+
 void error(string_view message) {
         cerr << "Error: " << message << endl;
         exit(EXIT_FAILURE);
@@ -54,6 +61,12 @@ int main() {
         cudaDeviceProp properties;
         check(cudaGetDeviceProperties(&properties, device));
         info(string("Device: ") + properties.name);
+
+        CUcontext cudaContext;
+        check(cuDevicePrimaryCtxRetain(&cudaContext, device));
+
+        OptixDeviceContext optixContext;
+        check(optixDeviceContextCreate(cudaContext, nullptr, &optixContext));
 
         return EXIT_SUCCESS;
 }
