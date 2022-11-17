@@ -44,6 +44,16 @@ void info(string_view message) {
         cout << message << endl;
 }
 
+void log(
+        unsigned int level,
+        const char *tag,
+        const char *message,
+        void *data) {
+
+        (void)data;
+        cerr << level << " " << tag << " " << message << endl;
+}
+
 int main() {
         int numberDevices = 0;
         check(cudaGetDeviceCount(&numberDevices));
@@ -67,6 +77,9 @@ int main() {
 
         OptixDeviceContext optixContext;
         check(optixDeviceContextCreate(cudaContext, nullptr, &optixContext));
+
+        unsigned int level = 4;
+        check(optixDeviceContextSetLogCallback(optixContext, log, nullptr, level));
 
         return EXIT_SUCCESS;
 }
