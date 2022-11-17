@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 #include <cuda_runtime.h>
 
@@ -27,10 +28,32 @@ void check(OptixResult result) {
         }
 }
 
+void error(string_view message) {
+        cerr << "Error: " << message << endl;
+        exit(EXIT_FAILURE);
+}
+
+void info(string_view message) {
+        cout << message << endl;
+}
+
 int main() {
-        int count = 0;
-        check(cudaGetDeviceCount(&count));
-        cout << "Found " << count << " CUDA device" << (count > 1 ? "s" : " " ) << endl;
+        int numberDevices = 0;
+        check(cudaGetDeviceCount(&numberDevices));
+        if (numberDevices == 0) {
+                error("Didn't find a graphics device!");
+        }
         check(optixInit());
+
+        const int device = 0;
+        check(cudaSetDevice(device));
+
+        CUstream stream;
+        check(cudaStreamCreate(&stream));
+
+        cudaDeviceProp properties;
+        check(cudaGetDeviceProperties(&properties, device));
+        info(string("Device: ") + properties.name);
+
         return EXIT_SUCCESS;
 }
